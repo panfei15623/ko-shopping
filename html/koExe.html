@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+    <title>ko练习</title>
+    <link rel="stylesheet" href="../lib/bootstrap-3.2.0-dist/css/bootstrap.css"/>
+    <link rel="stylesheet" href="../css/koExe.css"/>
+    <script src="../lib/jquery-1.8.3.min.js"></script>
+    <script src="../lib/knockout-3.2.0.js"></script>
+</head>
+<body class="container">
+    <h3>KnockoutJs+Bootstrap Demo</h3>
+    <div id="main">
+        <div id="left">
+            <h4>Book list</h4>
+                <div>
+                    <select class="form-control" multiple="multiple" data-bind="options: bookList,
+                                                            optionsText: 'bookName',
+                                                            selectedOptions: selectedBook ">
+                    </select>
+                </div>
+            <button class="btn btn-success shopping"  data-bind="click:addShopping">添加至购物车</button>
+        </div>
+        <div id="right">
+            <table class="table" style="width: 63%;">
+                <tr>
+                   <h4>Shopping Cart</h4>
+                </tr>
+                <tr>
+                    <td><input type="checkbox" data-bind="checked:selectAll"/></td>
+                    <td>ID</td>
+                    <td>Name</td>
+                    <td>Price</td>
+                    <td>Count</td>
+                    <td>Total</td>
+                </tr>
+                <!-- ko foreach: addBook -->
+                <tr>
+                    <td style="padding-top:12px"><input type="checkbox" data-bind="checked:checkBook"/></td>
+                    <td style="padding-top:12px"><span data-bind="text:id"></span></td>
+                    <td style="padding-top:12px"><span data-bind="text:bookName"></span></td>
+                    <td style="padding-top:12px"><span data-bind="text:price"></span></td>
+                    <td>
+                        <input type="button" value="-" class="btn btn-default btnR" data-bind="click:reduce">
+                        <input class="form-control inputC" data-bind="textInput:count"/>
+                        <input type="button" class="btn btn-default btnA" value="+" data-bind="click:add">
+                    </td>
+                    <td style="padding-top:12px"><span data-bind="text: total"></span></td>
+                </tr>
+                <!-- /ko-->
+                <tr>
+                    <td><button class="btn btn-success" data-bind="click:removeBook">删除书目</button></td>
+                    <td colspan="5" style="text-align: right;padding-top: 15px">总价：<span data-bind="text:sum"></span></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <script>
+        function Book(name, id, price) {
+            var  self = this;
+            this.bookName = name;
+            this.id = id;
+            this.price = price;
+            this.checkBook = ko.observable(true);
+            this.count = ko.observable(1);
+            this.total = ko.pureComputed(function(){
+                return this.price * this.count();
+            },this);
+            this.add = function() {
+                self.count(self.count()/1+1);
+            };
+            this.reduce = function() {
+                if(self.count() > 1) {
+                    self.count(self.count()/1-1);
+                }
+            }
+        }
+       function viewModel() {
+              var self = this;
+              this.addBook = ko.observableArray();
+              this.accountSum =  ko.observable(0);
+              this.bookList = ko.observableArray([
+                  new Book("Javascript高级程序设计",1,68),
+                  new Book("深入浅出Node.js",2,50),
+                  new Book("HTTP权威指南",3,75),
+                  new Book("白帽子讲Web安全",4,63)
+              ])
+              this.selectedBook = ko.observableArray();
+              this.addShopping = function() {
+                  while(self.selectedBook() && self.selectedBook().length) {
+                      self.addBook.push(self.selectedBook()[0]);
+                      self.bookList.remove(self.selectedBook()[0]);
+                  }
+              };
+              this.sum = ko.pureComputed(function() {
+                  var addSum = 0;
+                  for(var i = 0;i < self.addBook().length;i++) {
+                      if(self.addBook()[i].checkBook()) {
+                          addSum += self.addBook()[i].total();
+                      }
+                  }
+                  return addSum;
+              })
+              this.removeBook = function() {
+                  var length = self.addBook().length;
+                  var i = 0;
+                  while(length) {
+                      if(self.addBook()[i].checkBook()) {
+                         var rb =self.addBook()[i];
+                          self.addBook.remove(rb);
+                          self.bookList.push(rb);
+                          length--;
+                      }else {
+                          i++;
+                          length--;
+                      }
+                  }
+              };
+              this.selectAll = ko.computed({
+                    read: function() {
+                        var num = 0;
+                        var length = self.addBook() && self.addBook().length;
+                        for(var i = 0;i < length;i++) {
+                            if(self.addBook()[i].checkBook()) {
+                                num++;
+                            }
+                        }
+                            return num === self.addBook().length;
+                    },
+                    write: function(value) {
+                        var length = self.addBook() && self.addBook().length;
+                        for(var j = 0;j < length;j++) {
+                            self.addBook()[j].checkBook(value);
+                        }
+                    }
+              })
+        }
+        ko.applyBindings(new viewModel());
+    </script>
+</body>
+</html>

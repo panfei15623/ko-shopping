@@ -1,0 +1,30 @@
+body,html{
+    margin: 0px;
+    padding: 0px;
+    min-width: 900px;
+}
+#main{
+    border-top:1px solid lavender;
+    padding-top: 15px;
+}
+#left{
+    width: 30%;
+    float:left;
+    margin-right: 60px;
+}
+.shopping{
+    margin-top: 10px;
+}
+.inputC{
+    display: inline-block;
+    width: 45px;
+    height: 31px;
+}
+.btnR,.btnA{
+    padding: 0px 12px;
+    font-size: 20px;
+    font-weight: bold;
+}
+.btnR{
+    width:38px;
+}
